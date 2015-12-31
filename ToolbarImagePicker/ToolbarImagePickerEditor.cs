@@ -29,6 +29,7 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 		};
 
 		private IWindowsFormsEditorService _editorService;
+		private IUIService _uiService;
 
 		private IEnumerable<string> _reversePropertyActualNames;
 		private bool? _isSmall;
@@ -75,6 +76,8 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 			try
 			{
 				_editorService = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+				_uiService = (IUIService) provider.GetService(typeof (IUIService));
+
 				if (_editorService != null && context.PropertyDescriptor != null)
 				{
 					var propName = context.PropertyDescriptor.Name;
@@ -118,7 +121,10 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 			}
 			catch (Exception e)
 			{
-				MessageBox.Show($"Fatal error{Environment.NewLine}Exception {e.GetType().FullName}{Environment.NewLine}{e.Message}", @"Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				if(_uiService != null)
+					_uiService.ShowError(e, "Unhandled exception");
+				else
+					MessageBox.Show($"Fatal error{Environment.NewLine}Exception {e.GetType().FullName}{Environment.NewLine}{e.Message}", @"Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 			return base.EditValue(context, provider, value);
 		}

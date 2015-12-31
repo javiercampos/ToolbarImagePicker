@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 using EnvDTE;
 
 namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
@@ -43,6 +44,7 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 		private object _lastSelectedValue;
 		private IEnumerable<ResourceImage> _loadedResourceImages;
 		private IServiceProvider _provider;
+		private IUIService _uiService;
 		private dynamic _resourcePickerDialog;
 		private Task<IEnumerable<ResourceImage>> _runningTask;
 		private string _selectedResourceFile;
@@ -147,6 +149,7 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 			_context = context;
 			_provider = provider;
 			_defaultValue = _lastSelectedValue = defaultValue;
+			_uiService = (IUIService)provider.GetService(typeof (IUIService));
 			if (_lastSelectedValue != null)
 			{
 				_selectedResourceFile = GetResourceNameFromImage(_lastSelectedValue);
@@ -219,7 +222,7 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 			var found = LoadImageReference(resourceName);
 			if (found == null && alertIfNotFound)
 			{
-				MessageBox.Show($"Fatal error{Environment.NewLine}Can't find resource: {resourceName}", @"Fatal Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				_uiService.ShowError($"Fatal error{Environment.NewLine}Can't find resource: {resourceName}");
 				return null;
 			}
 			return found;
@@ -528,19 +531,19 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 		{
 			if (SelectedResourceImage == null)
 			{
-				MessageBox.Show(_strings.SelectingNoImage, _strings.SelectingNoImageTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				_uiService.ShowMessage(_strings.SelectingNoImage, _strings.SelectingNoImageTitle);
 				return;
 			}
 
 			if (SelectedResourceImage.Size == SmallSize && HasPreferredSize && (PreferredSizeVal ?? -1) == LargeSize)
 			{
-				var dr = MessageBox.Show(_strings.SelectingDifferentSmall, _strings.SelectingDifferentTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+				var dr = _uiService.ShowMessage(_strings.SelectingNoImage, _strings.SelectingNoImageTitle, MessageBoxButtons.YesNo);
 				if (dr == DialogResult.No)
 					return;
 			}
 			else if (SelectedResourceImage.Size == LargeSize && HasPreferredSize && (PreferredSizeVal ?? -1) == SmallSize)
 			{
-				var dr = MessageBox.Show(_strings.SelectingDifferentLarge, _strings.SelectingDifferentTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+				var dr = _uiService.ShowMessage(_strings.SelectingDifferentLarge, _strings.SelectingDifferentTitle, MessageBoxButtons.YesNo);
 				if (dr == DialogResult.No)
 					return;
 			}
