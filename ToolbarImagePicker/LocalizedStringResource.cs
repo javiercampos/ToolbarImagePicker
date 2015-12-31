@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 {
-	public class LocalizedStringResource : DynamicObject
+	internal class LocalizedStringResource : DynamicObject
 	{
 		private readonly ResourceManager _currentManager;
 

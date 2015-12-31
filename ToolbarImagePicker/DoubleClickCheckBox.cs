@@ -2,7 +2,7 @@
 
 namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 {
-	public class DoubleClickCheckBox : CheckBox
+	internal class DoubleClickCheckBox : CheckBox
 	{
 		public DoubleClickCheckBox()
 		{

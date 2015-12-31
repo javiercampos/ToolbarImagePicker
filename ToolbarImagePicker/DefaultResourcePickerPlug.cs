@@ -5,7 +5,7 @@ using EnvDTE;
 
 namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 {
-	public static class DefaultResourcePickerPlug
+	internal static class DefaultResourcePickerPlug
 	{
 		private static Type _resourcePickerDialogType;
 		private static Action _okAction;
