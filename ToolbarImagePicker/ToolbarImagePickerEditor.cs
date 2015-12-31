@@ -33,6 +33,38 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 		private IEnumerable<string> _reversePropertyActualNames;
 		private bool? _isSmall;
 
+		private IEnumerable<PropertyInfo> GetAvailableReversePropertyNames(object instance, string propertyName)
+		{
+			// This should never happen in its current state, but it may happen on future versions and
+			// I'll probably scratch my head and won't find this when it fails
+			if (_reversePropertyActualNames == null)
+				return Enumerable.Empty<PropertyInfo>();
+			var pl = instance.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
+			return pl.Where(x => _reversePropertyActualNames.Contains(x.Name) && x.Name != propertyName);
+		}
+
+		private ToolbarImagePickerForm GetEditForm(string propertyName, object instance)
+		{
+			var f = new ToolbarImagePickerForm(_lastSelectedResource);
+			_reversePropertyActualNames = Enumerable.Empty<string>();
+			if (_smallProperties.ContainsKey(propertyName))
+			{
+				_reversePropertyActualNames = _smallProperties[propertyName];
+				_isSmall = true;
+			}
+			else if (_largeProperties.ContainsKey(propertyName))
+			{
+				_reversePropertyActualNames = _largeProperties[propertyName];
+				_isSmall = false;
+			}
+
+			var actualPropertyNames = GetAvailableReversePropertyNames(instance, propertyName).Select(p => p.Name).ToList();
+			f.AllowSelectSmallLarge(_isSmall.HasValue ? (_isSmall.Value ? ToolbarImagePickerForm.SmallSize : ToolbarImagePickerForm.LargeSize) : -1, propertyName, actualPropertyNames);
+
+			return f;
+		}
+
+
 		#region UITypeEditor Overrides
 
 		public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
@@ -52,12 +84,15 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 						frm.SetContext(context, provider, value);
 
 						var dr = _editorService.ShowDialog(frm);
+
+						// We make the default VS resource picker return DialogResult.Yes
 						if (dr == DialogResult.Yes)
 						{
 							var x = frm.GetSelectedDefaultPickerValue();
 							frm.EndResourcePicker();
 							return x;
 						}
+						// Our own picker returns DialogResult.OK
 						if (dr != DialogResult.OK)
 							return base.EditValue(context, provider, value);
 
@@ -73,9 +108,7 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 								 )
 							)
 						{
-							var t = context.Instance.GetType();
-							var pl = t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
-							foreach (var p in pl.Where(x => _reversePropertyActualNames.Contains(x.Name) && x.Name != propName))
+							foreach (var p in GetAvailableReversePropertyNames(context.Instance, propName))
 								p.SetValue(context.Instance, frm.GetSelectedImage(_isSmall.Value ? ToolbarImagePickerForm.LargeSize : ToolbarImagePickerForm.SmallSize));
 						}
 						_lastSelectedResource = frm.LastSelectedResource;
@@ -112,29 +145,5 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 		}
 
 		#endregion
-
-		private ToolbarImagePickerForm GetEditForm(string propertyName, object instance)
-		{
-			var f = new ToolbarImagePickerForm(_lastSelectedResource);
-			_reversePropertyActualNames = Enumerable.Empty<string>();
-			if (_smallProperties.ContainsKey(propertyName))
-			{
-				_reversePropertyActualNames = _smallProperties[propertyName];
-				_isSmall = true;
-			}
-			else if (_largeProperties.ContainsKey(propertyName))
-			{
-				_reversePropertyActualNames = _largeProperties[propertyName];
-				_isSmall = false;
-			}
-
-			var t = instance.GetType();
-			var pl = t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).ToList();
-
-			var actualPropertyNames = pl.Where(x => _reversePropertyActualNames.Contains(x.Name) && x.Name != propertyName).Select(p => p.Name).ToList();
-			f.AllowSelectSmallLarge(_isSmall.HasValue ? (_isSmall.Value ? ToolbarImagePickerForm.SmallSize : ToolbarImagePickerForm.LargeSize) : -1, propertyName, actualPropertyNames);
-
-			return f;
-		}
 	}
 }
