@@ -88,7 +88,7 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 
 
 		public string LastSelectedResource { get; private set; }
-		public bool SetSmallAndLarge => cbAllowSelectSmallLarge.Visible && cbAllowSelectSmallLarge.Enabled && cbAllowSelectSmallLarge.Checked;
+		public bool SetSmallAndLarge => cbAllowSelectSmallLarge.Enabled && cbAllowSelectSmallLarge.Checked;
 
 		private bool CurrentIsSmall => cbAllowSelectSmallLarge.Tag is int && (int)cbAllowSelectSmallLarge.Tag == SmallSize;
 		private bool HasPreferredSize => cbAllowSelectSmallLarge.Tag is int && (int)cbAllowSelectSmallLarge.Tag > 0;
@@ -172,11 +172,11 @@ namespace Jcl.Tools.WindowsForms.ToolbarImagePicker
 					ToSingleString(reverseProp, ","),
 					preferredSize == SmallSize ? _strings.AllowSmallLargeLarge : _strings.AllowSmallLargeSmall, reverseProp.Count == 1 ? _strings.AllowSmallLargePropertySingular : _strings.AllowSmallLargePropertyPlural);
 				cbSelectSize.SelectedIndex = preferredSize == SmallSize ? 0 : 1;
-				cbAllowSelectSmallLarge.Visible = cbAllowSelectSmallLarge.Checked = true;
+				cbAllowSelectSmallLarge.Visible = cbAllowSelectSmallLarge.Checked = cbAllowSelectSmallLarge.Enabled = true;
 			}
 			else
 			{
-				cbAllowSelectSmallLarge.Visible = cbAllowSelectSmallLarge.Checked = false;
+				cbAllowSelectSmallLarge.Visible = cbAllowSelectSmallLarge.Checked = cbAllowSelectSmallLarge.Enabled = false;
 			}
 		}
 
